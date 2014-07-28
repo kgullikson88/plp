@@ -37,7 +37,7 @@ else:
 FITTING_PATH = 'fitdata/'
 ONESTEP_PATH = '1step/'
 TWOSTEP_PATH = '2step/'
-PNG_PATH = './pngs/'
+PNG_PATH = './pdfs/'
 IMAGE_PATH = 'images/'
 MANUAL_PATH = 'manual/'
 
@@ -729,8 +729,8 @@ def draw_strips(strip, wave, desc='', linedata=[], lampname='', grayplot=False, 
     a2.set_xlabel('Wavelength [um]')
     a2.set_xlim((wmin, wmax))
     a2.set_ylim((0, fmax[0]*1.1))
-#    f2.savefig(target_path+'%s_prof.png' % (desc,)) #2013-11-21 cksim commented this
-    f2.savefig(target_path+'%s.png' % (desc,)) #2013-11-21 cksim
+#    f2.savefig(target_path+'%s_prof.pdf' % (desc,)) #2013-11-21 cksim commented this
+    f2.savefig(target_path+'%s.pdf' % (desc,)) #2013-11-21 cksim
     
     if grayplot == True:
         f3 = plt.figure(3, figsize=(12,5),dpi=200)
@@ -751,7 +751,7 @@ def draw_strips(strip, wave, desc='', linedata=[], lampname='', grayplot=False, 
         a3.set_xticks(xticks)
         a3.set_xticklabels(['%.3f' % x for x in cticks])
         a3.set_xlabel('Wavelength [um]')
-        f3.savefig(target_path+'%s_gray.png' % (desc,))
+        f3.savefig(target_path+'%s_gray.pdf' % (desc,))
     
     plt.close('all')    
     
@@ -782,7 +782,7 @@ def test2(band, lname='ohlines'):
     a1.set_title('IGRINS %s band - %s (simulated)' % (band,lname))
     a1.set_xlabel('X [pixel]')
     a1.set_ylabel('Y [pixel]')
-    f1.savefig(PNG_PATH+'IGRINS_%s_%s.png' % (band,lname))
+    f1.savefig(PNG_PATH+'IGRINS_%s_%s.pdf' % (band,lname))
     plt.close('all')
 
 def test3(band, lname='ohlines'):
@@ -825,7 +825,7 @@ def test4(band, lname='ohlines'):
         a1.set_ylim((0,ny))
         a1.set_title('%s' % (strdesc,))
         
-        f2.savefig(PNG_PATH+strdesc+'.png')
+        f2.savefig(PNG_PATH+strdesc+'.pdf')
         
         strdesc = 'tIGRINS_%s_%s.%03d' % (band, lname, k)
         strip, hdr = ip.readfits(MANUAL_PATH+strdesc+'.fits')

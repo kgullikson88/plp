@@ -492,9 +492,9 @@ class CDisplay():
         self.WriteLog = open(self.reducepath+pllogfilename,'a')
         self.StatusInsert("# Reduction for calibration frames started at "+time.strftime('%Y-%m-%d %H:%M:%S'))
 
-        self.makepng = True
-        self.pngpath = self.reducepath+'pngs/' 
-        if not os.path.exists(self.pngpath): os.mkdir(self.pngpath)
+        self.makepdf = True
+        self.pdfpath = self.reducepath+'pdfs/' 
+        if not os.path.exists(self.pdfpath): os.mkdir(self.pdfpath)
                       
         self.calexebtn.config(state=DISABLED)
         self.calabortbtn.config(state=ACTIVE)
@@ -524,9 +524,9 @@ class CDisplay():
         self.WriteLog = open(self.reducepath+pllogfilename,'a')
         self.StatusInsert("Reduction for object frames started at "+time.strftime('%Y-%m-%d %H:%M:%S'))
 
-        self.makepng = True
-        self.pngpath = self.reducepath+'pngs/' 
-        if not os.path.exists(self.pngpath): os.mkdir(self.pngpath)
+        self.makepdf = True
+        self.pdfpath = self.reducepath+'pdfs/' 
+        if not os.path.exists(self.pdfpath): os.mkdir(self.pdfpath)
 
         self.calexebtn.config(state=DISABLED)
         self.objexebtn.config(state=DISABLED)
@@ -708,7 +708,7 @@ class CDisplay():
                     
                 else:
 		        
-                    #id_stripfiles = self.identify(objtype,stripfiles,makepng=self.makepng)
+                    #id_stripfiles = self.identify(objtype,stripfiles,makepdf=self.makepdf)
                     pass
 
                         
@@ -763,11 +763,11 @@ class CDisplay():
 
                     stripfiles = self.transform_aperture(objtype, groupID)
                     
-                    specfiles = self.trace_n_average_AB(stripfiles,pngpath=self.makepng)   
+                    specfiles = self.trace_n_average_AB(stripfiles,pdfpath=self.makepdf)   
                     
                     #specfiles = ['SDCH_20130827-1_STANDARD_G%s.AB.tr.%03i.tpn' %(groupID,i) for i in range(1,24)]
                     specfiles = self.H_n_cont_removal(specfiles,threslow=1.5, threshigh=4., \
-                                                     pngpath=self.pngpath)
+                                                     pdfpath=self.pdfpath)
                     
                     #std_spectra.append(spectrum)
                     #del(id_stripfiles,spectra)
@@ -837,9 +837,9 @@ class CDisplay():
 
                     stripfiles = self.transform_aperture(objtype, groupID)
                     
-                    specfiles = self.trace_n_average_AB(stripfiles,pngpath=self.makepng)
+                    specfiles = self.trace_n_average_AB(stripfiles,pdfpath=self.makepdf)
                     
-                    specfiles = self.telcor(specfiles,pngpath=self.makepng)
+                    specfiles = self.telcor(specfiles,pdfpath=self.makepdf)
                    
     '''
     def readechellogram(self, list):
@@ -1252,7 +1252,7 @@ class CDisplay():
             ip.savefits(self.reducepath + outputfile, tstrip, header=thdr)
             np.savetxt(self.reducepath + self.fileprefix + objtype + '_G' + str(groupID) +'.ONOFF.tr.' + str(order[i]) + '.wave', linear_wave)
                 
-            check(stripfile, order[i], tstrip, lxx_tr, lwave, linear_par, linear_wave, pngpath= self.pngpath, datpath=self.datpath,\
+            check(stripfile, order[i], tstrip, lxx_tr, lwave, linear_par, linear_wave, pdfpath= self.pdfpath, datpath=self.datpath,\
                     outputname= self.band + '_result_t' + self.fileprefix + objtype + '_G'+ str(groupID) + '.ONOFF.')
             
             # Plot results
@@ -1327,7 +1327,7 @@ class CDisplay():
                 
         return tr_stripfiles
        
-    def identify(self,objtype,stripfiles,makepng=False): 
+    def identify(self,objtype,stripfiles,makepdf=False): 
         self.StatusInsert('Transforming stripes.....using predefined functions')    
         tr_stripfiles=[]
         
@@ -1340,14 +1340,14 @@ class CDisplay():
             self.StatusInsert('Saved... '+output+'.fits')  
             tr_stripfiles.append(output+'.fits')   
             
-            if makepng == True:
+            if makepdf == True:
                 draw_strips_file(self.reducepath+output+'.fits', self.reducepath+output+'.wave', linefile='ohlines.dat', \
-                                 desc=output, target_path=self.pngpath)
+                                 desc=output, target_path=self.pdfpath)
 
         return tr_stripfiles
 
 
-    def trace_n_average_AB(self,filenames,pngpath=False): 
+    def trace_n_average_AB(self,filenames,pdfpath=False): 
         '''
         #2013-11-22 cksim 
         trace A and B and do the subtraction A-B using simple rectangular (distortion correction should have done good)
@@ -1393,7 +1393,7 @@ class CDisplay():
             outfiles.append(outfile)
         
             
-            if pngpath == True:
+            if pdfpath == True:
                 wave = [ABhdr['CRVAL1'], ABhdr['CDELT1']]  
                 f1 = plt.figure(1, figsize=(9,8),dpi=200)
                 f1.suptitle(outfile)
@@ -1441,7 +1441,7 @@ class CDisplay():
                     
                 f1.tight_layout()
                 plt.subplots_adjust(top=0.9)
-                plt.savefig(self.pngpath+outfile+'.png')
+                plt.savefig(self.pdfpath+outfile+'.pdf')
                 #plt.close('all')
                 matplotlib.pyplot.close()
 
@@ -1508,7 +1508,7 @@ class CDisplay():
 
                 
     
-    def H_n_cont_removal(self,filenames,threslow=1.5,threshigh=4.,pngpath=False):     
+    def H_n_cont_removal(self,filenames,threslow=1.5,threshigh=4.,pdfpath=False):     
         import scipy.stats as mstats
  
         self.StatusInsert("Removing H lines from the standard...")          
@@ -1612,7 +1612,7 @@ class CDisplay():
             outfiles.append(coutfile)
                         
                 
-            if not pngpath == False:            
+            if not pdfpath == False:            
                 f1 = plt.figure(1, figsize=(9,7), dpi=200)
                 f1.suptitle(coutfile)
                 
@@ -1633,13 +1633,13 @@ class CDisplay():
 
                 f1.tight_layout()
                 plt.subplots_adjust(top=0.9,right=0.7)
-                plt.savefig(pngpath+coutfile+'.png')
+                plt.savefig(pdfpath+coutfile+'.pdf')
                 #plt.close('all')    
                 matplotlib.pyplot.close()
         
         return outfiles
     
-    def telcor(self,filenames,pngpath=False,threslow=1.,threshigh=4.):
+    def telcor(self,filenames,pdfpath=False,threslow=1.,threshigh=4.):
         
         outfiles=[]        
         for filename in filenames:
@@ -1668,7 +1668,7 @@ class CDisplay():
             outfiles.append(outfile)
  
          
-            if self.makepng == True:
+            if self.makepdf == True:
                 #2013-11-28 cksim, below plot for the development stage                
                 f2 = plt.figure(2,figsize=(9,7), dpi=200)
                 f2.suptitle(outfile)
@@ -1688,7 +1688,7 @@ class CDisplay():
                 
                 f2.tight_layout()
                 plt.subplots_adjust(top=0.9,right=0.7)
-                plt.savefig(self.pngpath+outfile+'.png')
+                plt.savefig(self.pdfpath+outfile+'.pdf')
                 #plt.close('all')
                 matplotlib.pyplot.close()
                 

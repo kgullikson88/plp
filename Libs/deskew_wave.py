@@ -215,7 +215,7 @@ def reidentify(image, npix, lxx):
             #ff = plt.figure(11, figsize=(14,7))
             #a = ff.add_subplot(111)
             #a.plot(line1, 'k', fitting, 'r')
-            #ff.savefig(TDIR+ str(lxx[st]) + str(j)+ str(i)+ '.png')
+            #ff.savefig(TDIR+ str(lxx[st]) + str(j)+ str(i)+ '.pdf')
             #plt.close('all')
             #plt.show()
             
@@ -657,7 +657,7 @@ def calibration(aperture, stripfile, lxx, lwave, datpath='', datapath='', output
 
     return tstrip, delta_s, coeff, b, linear_wave, lxx_t
 
-def check(stripfile, aperture, tstrip, lxx_t, lwave, b, linear_wave, pngpath='', datpath='', outputname=''):
+def check(stripfile, aperture, tstrip, lxx_t, lwave, b, linear_wave, pdfpath='', datpath='', outputname=''):
 
     # Input images
     img, ahdr = ip.readfits(stripfile)
@@ -829,7 +829,7 @@ def check(stripfile, aperture, tstrip, lxx_t, lwave, b, linear_wave, pngpath='',
     ax8.set_xlim(min(linear_wave), max(linear_wave))
     plt.xlabel('Wavelength [microns]')
 
-    plt.savefig(pngpath + outputname + str(aperture) + '.png')
+    plt.savefig(pdfpath + outputname + str(aperture) + '.pdf')
     plt.close()
 
     return coeff2

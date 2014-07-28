@@ -426,7 +426,7 @@ def ap_tracing_strip(band, filename, npoints=40, spix=10, dpix=20, thres=14000, 
     plt.xlim(0,nx)
     plt.ylim(0,ny)
     plt.show()
-    plt.savefig(target_path+name+'_aptracing2.png')
+    plt.savefig(target_path+name+'_aptracing2.pdf')
     plt.close('all')
     
     return ap_coeffs1, ap_coeffs2
@@ -605,7 +605,7 @@ def _ap_extract1(img, ap_coeffs, width=[-30,30], hdr=None):
 
 def _ap_extract2(band, filename, ap_coeffs1 ,ap_coeffs2, \
                 width=60, ap_num=[], target_path=MANUAL_PATH, 
-                savepng=False):
+                savepdf=False):
     '''
     Extract the strips based on the FLAT image 
      - inputs 
@@ -683,9 +683,9 @@ def _ap_extract2(band, filename, ap_coeffs1 ,ap_coeffs2, \
         a1.plot(xpos, ypos1, 'g-', linewidth=3, alpha=0.5) 
         a1.plot(xpos, ypos2, 'r-', linewidth=3, alpha=0.5)
                                 
-        if savepng == True : 
+        if savepdf == True : 
             a2.imshow(tstrip, cmap='gray')
-            f2.savefig(target_path+name+'.%03d.png' % (i,))
+            f2.savefig(target_path+name+'.%03d.pdf' % (i,))
             a2.cla()
         
         print 'ap[%d] : extracted ' % (i,)
@@ -713,7 +713,7 @@ def _ap_extract2(band, filename, ap_coeffs1 ,ap_coeffs2, \
          
     a1.set_xlim(0,nx)
     a1.set_ylim(0,ny)
-    f1.savefig(target_path+name+'.all.png')            
+    f1.savefig(target_path+name+'.all.pdf')            
     plt.close('all')
     
     return strips, hdrs
