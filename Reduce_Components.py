@@ -5,6 +5,8 @@ import numpy as np
 import sys
 from scipy.signal import argrelmax, argrelmin
 import matplotlib.pyplot as plt
+from astropy import units
+from astropy.io import fits
 
 
 utilities = PL_Display.CDisplay("", "")
@@ -60,8 +62,6 @@ def FlatReduce(files, band, debug=False):
     return ap_coeffs1, ap_coeffs2
 
 
-
-
 def ArcReduce(files, band, aptops=None, apbottoms=None, debug=False):
     """
     Reduce the arc file: dark-correct, flat-correct, extract,
@@ -107,7 +107,13 @@ def ArcReduce(files, band, aptops=None, apbottoms=None, debug=False):
                                            band=band,
                                            target_path="%s/aperture_mapping/" %files.WorkingDirectory,
                                            debug=debug)
-    spectra = ExtractFromApertures(arc, hdr, aptops, apbottoms)
+    spectra, ypos = ExtractFromApertures(arc, hdr, aptops, apbottoms)
+
+    #Fit the Arc spectrum to determine the 2d wavelength calibration
+    wave_coeffs = FitDispersion(spectra,
+                                ypos,
+                                band=band,
+                                outpath="%s/aperture_mapping/" %files.WorkingDirectory)
 
 
 
@@ -350,11 +356,13 @@ def ExtractFromApertures(img, hdr, aptops, apbottoms, startpixel=300, endpixel=1
     pixels = np.arange(nx)
 
     spectra = []
+    ypos = []
 
     for apnum, (topcoeffs, bottomcoeffs) in enumerate(zip(aptops, apbottoms)):
         top = np.polynomial.polynomial.polyval(pixels,topcoeffs)
         bottom = np.polynomial.polynomial.polyval(pixels,bottomcoeffs)
 
+        ypos.append((top + bottom)[startpixel:-endpixel]/2.0)
 
         bottom = (top + bottom)/2.0 - apsize/2.0
         strip = np.zeros([apsize,nx], dtype=np.double)
@@ -394,7 +402,50 @@ def ExtractFromApertures(img, hdr, aptops, apbottoms, startpixel=300, endpixel=1
         spectra.append(spectrum2)
 
 
-    return spectra
+
+    return spectra, ypos
+
+
+
+
+def FitDispersion(spectra, ypos, band="H", outpath="./"):
+    """
+    This function will read in the spectra
+    :param spectra: A list of arc lamp spectra for each order
+    :param ypos: The y position on the chip, in the same format as spectra
+    :return: fitting coefficients for a 2d polynomial
+    """
+
+    theoretical_wave = fits.open("mapping/IGRINS_%s_MAPPING_May.fits" %band)[0].data[0]
+
+    th_wave, th_flux = np.loadtxt("ThArlines.dat", unpack=True)
+    th_wave *= units.angstrom.to(units.micron)
+    oh_wave, oh_flux = np.loadtxt("ohlines.dat", unpack=True)
+    oh_wave *= units.angstrom.to(units.micron)
+
+    def MakeSpec(x, wavelist, fluxlist):
+        y = np.zeros(x.size)
+        for w, f in zip(wavelist, fluxlist):
+            i = np.argmin(np.abs(x - w))
+            y[i] = f
+        return y
+
+    for i, (spec, y) in enumerate(zip(spectra, ypos)):
+        np.savetxt("%sspec_ap%.3i.dat" %(outpath, i), spec)
+        np.savetxt("%sypos_ap%.3i.dat" %(outpath, i), y)
+
+        pixels = np.arange(spec.size, dtype=np.int)
+        wave_est = theoretical_wave[np.round(y).astype(np.int),pixels+300]
+
+        x = np.linspace(wave_est[0], wave_est[-1], spec.size)
+        y1 = MakeSpec(x, th_wave, th_flux)
+        y2 = MakeSpec(x, oh_wave, oh_flux)
+
+        plt.plot(wave_est, spec/spec.max(), 'k-')
+        plt.plot(x, y1/y1.max(), 'r--')
+        plt.plot(x, y2/y2.max(), 'b--')
+    plt.show()
+
 
 
 
