@@ -118,6 +118,12 @@ if __name__ == "__main__":
     #Figure out what band we are working in
     band = files.WorkingDirectory[-1]
 
+    #Make a directory to store the aperture mapping information
+    apdir = "%s/aperture_mapping/" %files.WorkingDirectory
+    if not os.path.exists(apdir):
+        os.makedirs(apdir)
+
+
     # Reduce the flats
     print "Reducing Flats..."
     Reduce_Components.FlatReduce(files, band)
