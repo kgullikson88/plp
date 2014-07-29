@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 utilities = PL_Display.CDisplay("", "")
 
 
-def FlatReduce(files, band):
+def FlatReduce(files, band, debug=False):
     """
     Function to reduce the flat frames.
     """
@@ -37,22 +37,89 @@ def FlatReduce(files, band):
     flat, hdr = utilities.barenormalize(flat, hdr, band=band)
 
     #Save the file
+    print "Saving master flat to %s/FLAT.fits" %files.WorkingDirectory
     PL_Display.savefits("%s/FLAT.fits" %files.WorkingDirectory, flat, hdr)
-    """
 
+    """
     flat, hdr = PL_Display.readfits("%s/FLAT.fits" %files.WorkingDirectory)
 
     #Find the apertures
-    #apertures, tops, bottoms = FindApertures(flat, hdr)
+    startcol = 1024
+    medsize = 20
+    icol = np.median(flat[:,(startcol-medsize/2):(startcol+medsize/2)], axis=1)
+    apertures, tops, bottoms = FindApertures(icol)
+    #sys.exit()
 
     #Trace the apertures
-    ap_coeffs1, ap_coeffs2 = TraceApertures(flat, hdr, band=band, target_path="%s/aperture_mapping/" %files.WorkingDirectory)
+    ap_coeffs1, ap_coeffs2 = TraceApertures(flat,
+                                            hdr,
+                                            band=band,
+                                            target_path="%s/aperture_mapping/" %files.WorkingDirectory,
+                                            debug=debug)
+
+    return ap_coeffs1, ap_coeffs2
+
+
+
+
+def ArcReduce(files, band, aptops=None, apbottoms=None, debug=False):
+    """
+    Reduce the arc file: dark-correct, flat-correct, extract,
+    and fit the wavelength solution
+
+    :param files: The files structure
+    :param band: Either H or K
+    :param aptops: The coefficients for the tops of the apertures
+    :param apbottoms: The coefficients for the bottoms of the apertures
+    :param debug:
+    :return:
+    """
+
+    # Read in the arc files
+    imgsA, hdrsA = utilities.readechellogram(files.Arcs["ON"])
+    imgsB, hdrsB = utilities.readechellogram(files.Arcs["OFF"])
+
+    #Bad pixel corrections
+    imgsA, hdrsA = utilities.barebadpixcor(imgsA, band, headers=hdrsA)
+    imgsB, hdrsB = utilities.barebadpixcor(imgsB, band, headers=hdrsB)
+
+    #Combine
+    on, hdr_on = utilities.barecombine(imgsA, method="median", hdr=hdrsA[0])
+    off, hdr_off = utilities.barecombine(imgsB, method="median", hdr=hdrsB[0])
+
+    #Subtract on from off
+    arc, hdr = utilities.baresubtract(on, off, hdr=hdr_on)
+
+    #Divide by the flat
+    flat, fhdr = PL_Display.readfits("%s/FLAT.fits" %files.WorkingDirectory)
+    arc, hdr = utilities.flatcorrect([arc], flat, headers=[hdr])
+    arc = arc[0]
+    hdr = hdr[0]
+
+    #Save the file
+    print "Saving master arc to %s/ARC.fits" %files.WorkingDirectory
+    PL_Display.savefits("%s/ARC.fits" %files.WorkingDirectory, arc, hdr)
+
+    #Extract the apertures using the apertures defined by the flat
+    if aptops is None or apbottoms is None:
+        aptops, apbottoms = TraceApertures(flat,
+                                           fhdr,
+                                           band=band,
+                                           target_path="%s/aperture_mapping/" %files.WorkingDirectory,
+                                           debug=debug)
+    spectra = ExtractFromApertures(arc, hdr, aptops, apbottoms)
 
 
 
 
 
-def FindApertures(icol, threshold=0.25, medsize=20):
+
+    return None
+
+
+
+
+def FindApertures(icol, threshold=0.25, medsize=20, debug=False):
     """
       This function will find the apertures in a given image
     :param icol: A 1d array containing the collapsed chip (see definition in TraceApertures)
@@ -90,14 +157,14 @@ def FindApertures(icol, threshold=0.25, medsize=20):
     goodpeaks = np.array(goodpeaks)
     top = np.array(top)
     bottom = np.array(bottom)
-    #import pylab
-    #pylab.plot(icol)
-    #pylab.errorbar(goodpeaks, icol[goodpeaks], xerr=(goodpeaks-bottom, top-goodpeaks), fmt='k-')
-    #pylab.show()
+    if debug:
+      plt.plot(icol)
+      plt.errorbar(goodpeaks, icol[goodpeaks], xerr=(goodpeaks-bottom, top-goodpeaks), fmt='ko')
+      plt.show()
     return goodpeaks, top, bottom
 
 
-def TraceApertures(image, header, band, startcol=1024, stepsize=40, medsize=20, ap_thresh=10, degree=3, target_path="./"):
+def TraceApertures(image, header, band, startcol=1024, stepsize=40, medsize=20, ap_thresh=10, degree=3, target_path="./", debug=False):
     """
     Trace the apertures in the given image
 
@@ -167,7 +234,7 @@ def TraceApertures(image, header, band, startcol=1024, stepsize=40, medsize=20, 
                    % (i, xpos)
             else:
                 print 'ap[%d](x=%d) : The matching aperture position was too many(%d)' \
-                   % (i, xpos, len(tcap2))
+                   % (i, xpos, len(bottom))
 
 
     # the right side columns
@@ -204,15 +271,16 @@ def TraceApertures(image, header, band, startcol=1024, stepsize=40, medsize=20, 
                    % (i, xpos)
             else:
                 print 'ap[%d](x=%d) : The matching aperture position was too many(%d)' \
-                   % (i, xpos, len(tcap2))
+                   % (i, xpos, len(bottom))
 
 
     # sorting the (x, y) positions along x-direction for each aperture
     # polynomial fitting with degree
     ap_coeffs1, ap_coeffs2 = [], []
-    z1, z2 = PL_Display.zscale(image)
-    plt.figure(figsize=(10,10))
-    plt.imshow(image, cmap='gray', vmin=z1, vmax=z2)
+    if debug:
+      z1, z2 = PL_Display.zscale(image)
+      plt.figure(figsize=(10,10))
+      plt.imshow(image, cmap='gray', vmin=z1, vmax=z2)
     for k in range(len(apx1)): #n_ap):
         tapx1 = np.array(apx1[k],dtype=np.float)
         tapx2 = np.array(apx2[k],dtype=np.float)
@@ -236,8 +304,9 @@ def TraceApertures(image, header, band, startcol=1024, stepsize=40, medsize=20, 
         yfit1 = np.polynomial.polynomial.polyval(tapx1[tsort1],coeff1)
         yfit2 = np.polynomial.polynomial.polyval(tapx2[tsort2],coeff2)
 
-        plt.plot(tapx1[tsort1],tapy1[tsort1], 'go')
-        plt.plot(tapx2[tsort2],tapy2[tsort2], 'ro')
+        if debug:
+          plt.plot(tapx1[tsort1],tapy1[tsort1], 'go')
+          plt.plot(tapx2[tsort2],tapy2[tsort2], 'ro')
 
         print 'ap[%d]: delta_y1 = %12.8f %12.8f ' \
           % (k, np.mean(tapy1[tsort1]-yfit1), np.std(tapy1[tsort1]-yfit1))
@@ -248,18 +317,84 @@ def TraceApertures(image, header, band, startcol=1024, stepsize=40, medsize=20, 
         yfit1 = np.polynomial.polynomial.polyval(xx,coeff1)
         yfit2 = np.polynomial.polynomial.polyval(xx,coeff2)
 
-        plt.plot(xx,yfit1,'g-', linewidth=3, alpha=0.6)
-        plt.plot(xx,yfit2,'r-', linewidth=3, alpha=0.6)
+        if debug:
+          plt.plot(xx,yfit1,'g-', linewidth=3, alpha=0.6)
+          plt.plot(xx,yfit2,'r-', linewidth=3, alpha=0.6)
 
-    plt.xlim(0,nx)
-    plt.ylim(0,ny)
-    plt.show()
-    #plt.savefig(target_path+name+'_aptracing2.pdf')
-    plt.close('all')
+    if debug:
+      plt.xlim(0,nx)
+      plt.ylim(0,ny)
+      plt.show()
+      plt.savefig("%sFLAT_aptracing.pdf" %target_path)
+      plt.close('all')
 
     return ap_coeffs1, ap_coeffs2
 
 
+
+
+def ExtractFromApertures(img, hdr, aptops, apbottoms, startpixel=300, endpixel=100, debug=False, apsize=6):
+    """
+    Function to extract a spectrum directly from pre-defined apertures
+    This function does not try to adjust the apertures at all!
+    :param img: The image to extract
+    :param hdr: The header of that image
+    :param aptops: The coefficients for the tops of each aperture
+    :param apbottoms: The coefficients for the bottoms of each aperture
+    :param startpixel: The first pixel to use (because the blaze function cuts off)
+    :param endpixel: The last pixel to use
+    :return: a list of extracted spectra
+    """
+
+    nx, ny = img.shape
+    pixels = np.arange(nx)
+
+    spectra = []
+
+    for apnum, (topcoeffs, bottomcoeffs) in enumerate(zip(aptops, apbottoms)):
+        top = np.polynomial.polynomial.polyval(pixels,topcoeffs)
+        bottom = np.polynomial.polynomial.polyval(pixels,bottomcoeffs)
+
+
+        bottom = (top + bottom)/2.0 - apsize/2.0
+        strip = np.zeros([apsize,nx], dtype=np.double)
+        yy, xx = np.indices(strip.shape)
+        ap_yy = np.array(yy, dtype=np.double) + bottom
+        iyy = np.array(np.round(ap_yy), dtype=np.int)
+        # calculate the fraction subtracted by integer pixel index
+        fyy = ap_yy - iyy
+        # find the valid points
+        vv = np.where((iyy >= 0) & (iyy <= ny-2))
+        # input the value into the strip
+        #we use "round" 2013-09-03 meeting with SPak & Huynh Anh
+        #and we don't scale or interpolate pixel intensities 2013-09-03 meeting with SPak & Huynh Anh
+        #strip[yy[vv],xx[vv]] = \
+        #   img[iyy[vv],xx[vv]] * (1.0 - fyy[yy[vv],xx[vv]]) + \
+        #   img[(iyy[vv]+1),xx[vv]] * fyy[yy[vv],xx[vv]]
+        strip[yy[vv],xx[vv]] = img[iyy[vv],xx[vv]]
+        spectrum = np.mean(strip, axis=0)[startpixel:-endpixel]
+        spectrum2 = np.median(strip, axis=0)[startpixel:-endpixel]
+
+        """
+        z1, z2 = PL_Display.zscale(strip)
+        fig = plt.figure(figsize=(10, 10))
+        ax1 = fig.add_subplot(211)
+        ax2 = fig.add_subplot(212)
+        ax1.imshow(strip, vmin=z1, vmax=z2, aspect='auto')
+        ax2.plot(np.arange(spectrum.size)+startpixel, spectrum, 'k-')
+        ax2.plot(np.arange(spectrum2.size)+startpixel, spectrum2, 'b-')
+        ax2.set_xlim((0, nx))
+        ylim = ax2.get_ylim()
+        ylim = [max(0, ylim[0]), ylim[1]]
+        ax2.set_ylim(ylim)
+        ax1.set_title("Aperture %i" %apnum)
+        plt.show()
+        """
+
+        spectra.append(spectrum2)
+
+
+    return spectra
 
 
 

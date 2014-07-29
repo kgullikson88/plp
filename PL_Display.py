@@ -1172,6 +1172,26 @@ class CDisplay():
         except: self.StatusInsert("Divide by [FLAT]")
         return imgs_nf, hdrs
 
+    def flatcorrect(self, imgs, flat, headers=None):
+        """
+        Function to divide a set of images by a master flat frame
+        They should be dark-subtracted before calling this!
+        (I should check for it at some point...)
+        :param imgs:
+        :param flat:
+        :param headers:
+        :return: flat-corrected files
+        """
+        cimgs = []
+        hdrs = []
+        for i, img in enumerate(imgs):
+            cimgs.append(imarith(img, flat, "/"))
+            if headers == None: hdr = newheader()
+            else: hdr = headers[i]
+            hdr.update('HISTORY', '/ FLAT')
+            hdrs.append(hdr)
+        return cimgs, hdrs
+
 
     def deskew(self, objtype, img, groupID, header='', deskew_path='./standardmap/', outname=''):
 

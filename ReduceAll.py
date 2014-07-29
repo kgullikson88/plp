@@ -126,6 +126,10 @@ if __name__ == "__main__":
 
     # Reduce the flats
     print "Reducing Flats..."
-    Reduce_Components.FlatReduce(files, band)
+    aptops, apbottoms = Reduce_Components.FlatReduce(files, band, debug=False)
+
+    # Reduce the Arc lamps
+    print "Reducing Arc Lamps..."
+    Reduce_Components.ArcReduce(files, band, aptops=aptops, apbottoms=apbottoms)
 
 
