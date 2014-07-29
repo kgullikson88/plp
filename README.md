@@ -1,4 +1,4 @@
-# IGRINS Pipeline Package
+# IGRINS Pipeline Package - Script version for Kevin Gullikson
 
 IGRINS pipeline package is currently in active development. 
 
@@ -11,7 +11,3 @@ with Prof. Soojong Pak and his team.
 This is still a work in progress. While the current pipeline works to
 some extent, there are things that should be fixed/improved/extended.
 
-We expect to release an improved version of the pipeline by early
-August, which will include more reasonable wavelength calibration
-feature.  We plan to include more rigorous telluric correction feature
-in the pipeline but it won't ready this time.
