@@ -294,8 +294,8 @@ def process_abba_band(recipe, utdate, refdate, band, obsids, frametypes,
                                                     "spec_"+tgt_basename,
                                                     "spec_"+tgt_basename)
         #figout = obj_path.get_secondary_path("spec", "spec_dir")
-        from libs.qa_helper import figlist_to_pngs
-        figlist_to_pngs(figout, fig_list)
+        from libs.qa_helper import figlist_to_pdfs
+        figlist_to_pdfs(figout, fig_list)
 
     # save html
 

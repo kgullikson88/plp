@@ -1,5 +1,6 @@
-UTDATE=20141015
-for RECIPE in flat thar sky-wvlsol a0v-ab stellar-ab blaze-correct extended-ab extended-onoff
+set -e
+UTDATE=$@
+for RECIPE in flat thar sky-wvlsol a0v-ab stellar-ab blaze-correct
 do
  python igr_pipe.py $RECIPE $UTDATE
  rc=$?

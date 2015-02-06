@@ -324,8 +324,8 @@ if __name__ == "__main__":
         check_readout_pattern(fig2, hdu_list, axis=0)
         fig2.tight_layout()
 
-        fig.savefig("readout_horizontal_pattern_%s.png" % band)
-        fig2.savefig("readout_vertical_pattern_%s.png" % band)
+        fig.savefig("readout_horizontal_pattern_%s.pdf" % band)
+        fig2.savefig("readout_vertical_pattern_%s.pdf" % band)
 
     if 1: # check destriper
         # with mask
@@ -341,7 +341,7 @@ if __name__ == "__main__":
             ax=fig.add_subplot(111)
             ax.imshow(bias_mask, origin="lower", cmap="gray_r",
                        vmin=0, vmax=1)
-            fig.savefig("destriper_mask_%s.png"%band, bbox_inches="tight")
+            fig.savefig("destriper_mask_%s.pdf"%band, bbox_inches="tight")
 
         hdu_list = igrins_log.get_cal_hdus(band, "flat_off")
         hdu = hdu_list[0]
@@ -349,10 +349,10 @@ if __name__ == "__main__":
         fig11, fig12 = check_destriper(hdu, None, vmin=-25, vmax=30)
         fig13, fig14 = check_destriper(hdu, bias_mask, vmin=-25, vmax=30)
 
-        fig11.savefig("destriper_test_image_flat_off_wo_mask_%s.png" % band)
-        fig12.savefig("destriper_test_cut_flat_off_wo_mask_%s.png" % band)
-        fig13.savefig("destriper_test_image_flat_off_w_mask_%s.png" % band)
-        fig14.savefig("destriper_test_cut_flat_off_w_mask_%s.png" % band)
+        fig11.savefig("destriper_test_image_flat_off_wo_mask_%s.pdf" % band)
+        fig12.savefig("destriper_test_cut_flat_off_wo_mask_%s.pdf" % band)
+        fig13.savefig("destriper_test_image_flat_off_w_mask_%s.pdf" % band)
+        fig14.savefig("destriper_test_cut_flat_off_w_mask_%s.pdf" % band)
 
 
         hdu_list = igrins_log.get_cal_hdus(band, "thar")
@@ -360,5 +360,5 @@ if __name__ == "__main__":
 
         fig15, fig16 = check_destriper(hdu, bias_mask, vmin=-30, vmax=80)
 
-        fig15.savefig("destriper_test_image_thar_w_mask_%s.png" % band)
-        fig16.savefig("destriper_test_cut_thar_w_mask_%s.png" % band)
+        fig15.savefig("destriper_test_image_thar_w_mask_%s.pdf" % band)
+        fig16.savefig("destriper_test_cut_thar_w_mask_%s.pdf" % band)

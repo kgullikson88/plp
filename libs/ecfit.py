@@ -263,7 +263,7 @@ if __name__ == "__main__":
 
 
     postfix = "%s_%s" % (utdate, band)
-    fig.savefig("ecfit_%s_fig1.png" % postfix)
+    fig.savefig("ecfit_%s_fig1.pdf" % postfix)
 
     if 0:
         xx = np.arange(0, 2048)

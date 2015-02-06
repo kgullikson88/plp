@@ -442,12 +442,12 @@ def process_distortion_sky_band(utdate, refdate, band, obsids, config):
                           masterhdu=None)
 
 
-        from libs.qa_helper import figlist_to_pngs
+        from libs.qa_helper import figlist_to_pdfs
         sky_figs = igr_path.get_section_filename_base("QA_PATH",
                                                       "oh_distortion",
                                                       "oh_distortion_dir")
         print fig_list
-        figlist_to_pngs(sky_figs, fig_list)
+        figlist_to_pdfs(sky_figs, fig_list)
 
 
     if 0:

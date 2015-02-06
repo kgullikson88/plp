@@ -377,9 +377,9 @@ if 0:
 
     if 0:
         postfix = "%s_%s" % (igrins_log.date, band)
-        fig1.savefig("align_zemax_%s_fig1_coverage.png" % postfix)
-        fig2.savefig("align_zemax_%s_fig2_fit.png" % postfix)
-        fig3.savefig("align_zemax_%s_fig3_hist_dlambda.png" % postfix)
+        fig1.savefig("align_zemax_%s_fig1_coverage.pdf" % postfix)
+        fig2.savefig("align_zemax_%s_fig2_fit.pdf" % postfix)
+        fig3.savefig("align_zemax_%s_fig3_hist_dlambda.pdf" % postfix)
 
 
 

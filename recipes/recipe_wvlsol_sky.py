@@ -388,11 +388,11 @@ def process_wvlsol_band(utdate, refdate, band, obsids, config):
             fig2.tight_layout()
 
     if 1:
-        from libs.qa_helper import figlist_to_pngs
+        from libs.qa_helper import figlist_to_pdfs
         sky_figs = igr_path.get_section_filename_base("QA_PATH",
                                                        "oh_fit2d",
                                                        "oh_fit2d_"+sky_basename)
-        figlist_to_pngs(sky_figs, [fig1, fig2])
+        figlist_to_pdfs(sky_figs, [fig1, fig2])
 
     if 1:
         from libs.products import ProductDB
@@ -774,12 +774,12 @@ def process_distortion_sky_band(utdate, refdate, band, obsids, config):
                           masterhdu=None)
 
 
-        from libs.qa_helper import figlist_to_pngs
+        from libs.qa_helper import figlist_to_pdfs
         sky_figs = igr_path.get_section_filename_base("QA_PATH",
                                                       "oh_distortion",
                                                       "oh_distortion_"+sky_basename)
         print fig_list
-        figlist_to_pngs(sky_figs, fig_list)
+        figlist_to_pdfs(sky_figs, fig_list)
 
 
     if 0:

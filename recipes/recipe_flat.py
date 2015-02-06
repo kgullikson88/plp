@@ -133,12 +133,12 @@ def process_flat_band(utdate, refdate, band, obsids_off, obsids_on,
     flaton_basename = os.path.splitext(os.path.basename(flat_on_filenames[0]))[0]
 
     if 1:
-        from libs.qa_helper import figlist_to_pngs
+        from libs.qa_helper import figlist_to_pdfs
         aperture_figs = igr_path.get_section_filename_base("QA_PATH",
                                                            "aperture_"+flaton_basename,
                                                            "aperture_"+flaton_basename)
 
-        figlist_to_pngs(aperture_figs, [fig1, fig2, fig3])
+        figlist_to_pdfs(aperture_figs, [fig1, fig2, fig3])
 
     # save db
     if 1:

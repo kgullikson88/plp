@@ -165,11 +165,11 @@ def process_thar_band(utdate, refdate, band, obsids, config):
         fig_list = check_thar_transorm(thar_products,
                                        thar_aligned_echell_products)
 
-        from libs.qa_helper import figlist_to_pngs
+        from libs.qa_helper import figlist_to_pdfs
         thar_figs = igr_path.get_section_filename_base("QA_PATH",
                                                        "thar",
                                                        "thar_"+thar_basename)
-        figlist_to_pngs(thar_figs, fig_list)
+        figlist_to_pdfs(thar_figs, fig_list)
 
         thar_wvl_sol = get_wavelength_solutions(thar_aligned_echell_products,
                                                 echel)
@@ -211,11 +211,11 @@ def process_thar_band(utdate, refdate, band, obsids, config):
     if 1:
         fig_list = check_order_flat(order_flat_products)
 
-        from libs.qa_helper import figlist_to_pngs
+        from libs.qa_helper import figlist_to_pdfs
         orderflat_figs = igr_path.get_section_filename_base("QA_PATH",
                                                             "orderflat",
                                                             "orderflat_"+thar_basename)
-        figlist_to_pngs(orderflat_figs, fig_list)
+        figlist_to_pdfs(orderflat_figs, fig_list)
 
     if 1:
         from libs.products import ProductDB
