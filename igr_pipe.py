@@ -14,7 +14,7 @@ from recipes.recipe_extract import (a0v_ab, stellar_ab,
                                     extended_ab, extended_onoff)
 from recipes.recipe_extract_plot import plot_spec
 from recipes.recipe_publish_html import publish_html
-
+from recipes.recipe_blaze_correct import blaze_correct
 from recipes.recipe_prepare_recipe_logs import prepare_recipe_logs
 
 recipe_list = [recipes.recipe_flat.flat,
@@ -27,7 +27,8 @@ recipe_list = [recipes.recipe_flat.flat,
                extended_onoff,
                plot_spec,
                publish_html,
-               prepare_recipe_logs
+               prepare_recipe_logs,
+	       blaze_correct
                ]
 
 parser = argh.ArghParser()
