@@ -4,3 +4,6 @@
 *.recipes
 *.tmp
 html_*
+calib
+indata
+outdata
