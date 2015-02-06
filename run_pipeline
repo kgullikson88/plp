@@ -1,0 +1,9 @@
+UTDATE=20141015
+for RECIPE in flat thar sky-wvlsol a0v-ab stellar-ab blaze-correct extended-ab extended-onoff
+do
+ python igr_pipe.py $RECIPE $UTDATE
+ rc=$?
+ if [ $rc != "0" ]; then
+   exit $rc
+ fi
+done
